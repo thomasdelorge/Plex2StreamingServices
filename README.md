@@ -3,7 +3,7 @@ A script to check if your Plex's movies are already in Netflix, Disney+, Amazon 
 
 Inspirated from https://github.com/SpaceK33z/plex2netflix (deprecated)
 
-## Setup
+## Option 1 : searching into localfile
 - Edit $apiKey, $streamingServiceSubscribed and $language variables in the script (ligne 4-6)
 - Plex library organization : 1 folder/movie with format '%movie_name (%year%)" (i use FileBot 4.7.9 to do this quickly)
 ```
@@ -22,6 +22,10 @@ C:.
 │       About Time (2013).mkv
 ```
 - Move the .ps1 file into the directory containing all your movie and start
+
+## Option 2 : searching into plex movies
+- Complete setup and start the script
+- WARN : by default, request plex api in library 1 > I'll update this later :) 
 
 ## Screenshots
 ![alt text](https://github.com/thomasdelorge/Plex2StreamingServices/blob/main/screenshot.jpg?raw=true "Console screenshot")
