@@ -24,8 +24,7 @@ C:.
 - Move the .ps1 file into the directory containing all your movie and start
 
 ## Option 2 : searching into plex movies
-- Complete setup and start the script
-- WARN : by default, request plex api in library 1 > I'll update this later :) 
+- Complete setup part (first lines of the .ps1 file) and start the script
 
 ## Screenshots
 ![alt text](https://github.com/thomasdelorge/Plex2StreamingServices/blob/main/screenshot.jpg?raw=true "Console screenshot")
