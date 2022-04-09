@@ -1,29 +1,53 @@
 ################################
 ### SETTINGS : TO COMPLETE ! ###
 ################################
-$ApiKey = "XXXXXXXXXXXXXXXXXXXXXX" # TMDB's API Documentation : https://developers.themoviedb.org/3/getting-started/introduction
+$ApiKey = "CHANGEME" # TMDB's API Documentation : https://developers.themoviedb.org/3/getting-started/introduction
 $streamingServiceSubscribed = "Netflix,Amazon Prime Video,Disney Plus" # all streaming services you're subscribed (separated by comma). List at https://developers.themoviedb.org/3/watch-providers/get-movie-providers
-$language = "FR" # TMDB's API Documentation :https://developers.themoviedb.org/3/getting-started/languages
+$language = "CHANGEME" # TMDB's API Documentation :https://developers.themoviedb.org/3/getting-started/languages
+$plexIp = "CHANGEME"
+$plexToken = "CHANGEME"
 
 ##############
 ### SCRIPT ###
 ##############
 
-# Get movie list
-$movieList = Get-ChildItem -Path "$PSScriptRoot" -Directory
+# User choose between plex API call or Local file searching
+$answer = Read-Host "Would you like to request Plex's api or user local directory ? (plex/local)"
+if ($answer -eq "plex") {
+    [XML]$plexMoviesList = Invoke-WebRequest -Uri "http://$($plexIp):32400/library/sections/1/all?X-Plex-Token=$plexToken"
+    $movies = $plexMoviesList.MediaContainer.Video | Select-Object title
+}
+elseif ($answer -eq "local"){
+    $answer2 = Read-Host "Please enter path to movies directory"
+    if (!(Test-Path "$answer2")){ 
+        Write-Host "Directory $answer doesn't exist !" -ForegroundColor Red
+        pause
+        exit
+    }
+    $movies = Get-ChildItem -Path "$answer2" -Directory | Select-Object name
+}
+else { exit }
+
 
 # ForEach Movie
-foreach ($movie in $movieList) {
-    # Name's rework
-    $movieOriginalName = "$($movie.name)"
-    $movieName = $movieOriginalName -replace " ", "+" -replace "\+\(....\)",'' -replace "#",""
+foreach ($movie in $movies) {
+
+    if ($answer -eq "plex"){
+        $movie = $movie.title
+    }
+    elseif ($answer -eq "local"){
+        $movie = $movie.name
+    }
+
+    # Rework name for plex api
+    $movieName = $movie -replace " ", "+" -replace "\+\(....\)",'' -replace "#",""
 
     # Api call : find tmdb id with movie name
     $searchMovieIdByName = Invoke-WebRequest -Uri "http://api.themoviedb.org/3/search/movie?api_key=$ApiKey&query=$movieName&language=$language"
 
     # Check StatusCode is 200 (OK)
     if ($searchMovieIdByName.StatusCode -ne 200){
-        Write-Host "$movieOriginalName API's call failed ($($searchMovieIdByName.StatusDescription))" -ForegroundColor Red
+        Write-Host "$movie API's call failed ($($searchMovieIdByName.StatusDescription))" -ForegroundColor Red
         Pause
         continue
     }
@@ -34,11 +58,11 @@ foreach ($movie in $movieList) {
     # Check how many movies as been found
     # If 0 or >1 : error
     if ($searchMovieIdByName.Count -eq 0){
-        Write-Host "$movieOriginalName : Movie not found in TMDB" -ForegroundColor Yellow
+        Write-Host "$movie : Movie not found in TMDB" -ForegroundColor Yellow
         continue
     }
     ElseIf ($searchMovieIdByName.Count -gt 1){
-        Write-Host "$movieOriginalName : Multiples movies founded with this name" -ForegroundColor Yellow
+        Write-Host "$movie : Multiples movies founded with this name" -ForegroundColor Yellow
         continue
     }
 
@@ -54,8 +78,7 @@ foreach ($movie in $movieList) {
         $streamingServiceAvailableName = $streamingServiceAvailable.results.$language.flatrate.provider_name -join ", "
 
         # Check with streaming service subscribed ($streamingServiceSubscribed)
-        try{ Clear-Variable flag }
-        catch {Clear-Host}
+        $flag = $null
         $streamingServiceSubscribed = $streamingServiceSubscribed -split ','
         foreach ($service in $streamingServiceSubscribed){
             if ($streamingServiceAvailableName -eq $service){
@@ -64,13 +87,13 @@ foreach ($movie in $movieList) {
         }
 
         if ($flag -eq "true"){
-            Write-Host "$movieOriginalName : Already available in $streamingServiceAvailableName" -ForegroundColor Red
+            Write-Host "$movie : Already available in $streamingServiceAvailableName" -ForegroundColor Red
         }
         else {
-            Write-Host "$movieOriginalName : OK" -ForegroundColor Green
+            Write-Host "$movie : OK" -ForegroundColor Green
         }
     }
     else {
-        Write-Host "$movieOriginalName : OK" -ForegroundColor Green
+        Write-Host "$movie : OK" -ForegroundColor Green
     }
-}
+} 
