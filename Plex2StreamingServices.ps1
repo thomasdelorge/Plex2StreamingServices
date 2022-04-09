@@ -14,7 +14,19 @@ $plexToken = "CHANGEME"
 # User choose between plex API call or Local file searching
 $answer = Read-Host "Would you like to request Plex's api or user local directory ? (plex/local)"
 if ($answer -eq "plex") {
-    [XML]$plexMoviesList = Invoke-WebRequest -Uri "http://$($plexIp):32400/library/sections/1/all?X-Plex-Token=$plexToken"
+
+    # User need to select wich plex library will be analyse
+	[XML]$plexLibraries = Invoke-WebRequest -Uri "http://$($plexIp):32400/library/sections/?X-Plex-Token=$plexToken"
+    $plexLibraries.MediaContainer.Directory | Select-Object title, key | Format-Table
+    $library = Read-Host "Choose wich library you want to analyse (key number)"
+    if ($plexLibraries.MediaContainer.Directory.key -notcontains $library){
+        Write-Host "[ERROR] Bad library key number" -ForegroundColor Red
+        pause
+        exit
+    }
+
+    # Request movies list
+    [XML]$plexMoviesList = Invoke-WebRequest -Uri "http://$($plexIp):32400/library/sections/$library/all?X-Plex-Token=$plexToken"
     $movies = $plexMoviesList.MediaContainer.Video | Select-Object title
 }
 elseif ($answer -eq "local"){
