@@ -51,7 +51,7 @@ foreach ($movie in $movies) {
         $movie = $movie.name
     }
 
-    # Rework name for plex api
+    # Rework name for tmdb api
     $movieName = $movie -replace " ", "+" -replace "\+\(....\)",'' -replace "#",""
 
     # Api call : find tmdb id with movie name
