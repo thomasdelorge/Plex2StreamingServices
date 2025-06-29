@@ -1,4 +1,8 @@
+> 🆕 Do the same easely with 🌐 [`https://thomasdelorge.github.io/library-streaming-checker/`](https://thomasdelorge.github.io/library-streaming-checker/)
+
 # Plex2StreamingServices
+
+
 A script to check if your Plex's movies are already in Netflix, Disney+, Amazon Prime Video, etc ..
 
 Inspirated from https://github.com/SpaceK33z/plex2netflix (deprecated)
